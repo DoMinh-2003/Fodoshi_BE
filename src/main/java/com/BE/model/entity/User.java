@@ -1,9 +1,8 @@
 package com.BE.model.entity;
 
 
-import com.BE.enums.RoleEnum;
+import com.BE.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -25,25 +25,27 @@ public class User implements UserDetails {
 
     @Id
     @UuidGenerator
-    UUID id;
+    private UUID id;
 
-    String fullName;
+    @Column(nullable = false, length = 255)
+    private String name;
 
 
+    @Column(nullable = false, unique = true, length = 255)
+    private String email;
 
+    @Column(nullable = false, unique = true, length = 20)
+    private String phoneNumber;
 
-    @Column(unique = true)
-    String email;
+    @Column(nullable = false)
+    private String password;
 
-    @Column(unique = true)
-    String username;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    String password;
-
-    @Enumerated(value = EnumType.STRING)
-    RoleEnum role;
-
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     Set<RefreshToken> refreshTokens = new HashSet<>();
@@ -56,6 +58,11 @@ public class User implements UserDetails {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(this.role.toString()));
         return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.phoneNumber;
     }
 
     @Override

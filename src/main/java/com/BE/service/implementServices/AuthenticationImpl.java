@@ -1,7 +1,7 @@
 package com.BE.service.implementServices;
 
 
-import com.BE.enums.RoleEnum;
+import com.BE.enums.UserRole;
 import com.BE.exception.exceptions.BadRequestException;
 import com.BE.exception.exceptions.InvalidRefreshTokenException;
 import com.BE.mapper.UserMapper;
@@ -60,7 +60,7 @@ public class AuthenticationImpl implements IAuthenticationService {
     public User register(AuthenticationRequest request) {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(RoleEnum.USER);
+        user.setRole(UserRole.CONSIGNOR);
        try {
            return userRepository.save(user);
        }catch (DataIntegrityViolationException e){
@@ -74,7 +74,7 @@ public class AuthenticationImpl implements IAuthenticationService {
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername().trim(),
+                            request.getPhoneNumber().trim(),
                             request.getPassword().trim()
                     )
             );
@@ -98,10 +98,9 @@ public class AuthenticationImpl implements IAuthenticationService {
             User user = userRepository.findByEmail(email).orElseThrow();
             if(user == null) {
                 user = new User();
-                user.setFullName(decodeToken.getName());
+                user.setName(decodeToken.getName());
                 user.setEmail(email);
-                user.setUsername(email);
-                user.setRole(RoleEnum.USER);
+                user.setRole(UserRole.CONSIGNOR);
                 user = userRepository.save(user);
             }
             AuthenticationResponse authenticationResponse = userMapper.toAuthenticationResponse(user);
@@ -125,7 +124,7 @@ public class AuthenticationImpl implements IAuthenticationService {
         emailDetail.setSubject("Reset password for account " + user.getEmail() + "!");
         emailDetail.setMsgBody("aaa");
         emailDetail.setButtonValue("Reset Password");
-        emailDetail.setFullName(user.getFullName());
+        emailDetail.setFullName(user.getName());
         emailDetail.setLink("http://localhost:5173?token=" + jwtService.generateToken(user));
 
         Runnable r = new Runnable() {

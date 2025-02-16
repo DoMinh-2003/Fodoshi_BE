@@ -69,7 +69,7 @@ public class JWTService {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(user.getPhoneNumber())
                 .issueTime(Date.from(Instant.now()))
                 .expirationTime(Date.from(Instant.now().plus(DURATION, ChronoUnit.SECONDS)))
                 .claim("scope", "ROLE_" + user.getRole())
@@ -98,7 +98,7 @@ public class JWTService {
             JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
             String username = claimsSet.getSubject();
 
-            return userRepository.findByUsername(username).orElse(null);
+            return userRepository.findByPhoneNumber(username).orElse(null);
         } catch (ParseException | JOSEException e) {
             throw new RuntimeException("Error parsing token", e);
         }
