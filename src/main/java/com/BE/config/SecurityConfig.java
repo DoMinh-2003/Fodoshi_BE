@@ -47,7 +47,7 @@ public class SecurityConfig  {
             "/api/status",
             "/api/refresh",
             "/api/logout",
-            "/api/products/status"
+
 
     };
 
@@ -55,7 +55,8 @@ public class SecurityConfig  {
             "/api/testRole",
             "/api/products/**",
             "/api/categories/**",
-            "/api/brands/**"
+            "/api/brands/**",
+            "/api/products/status/**"
     };
 
     @Autowired

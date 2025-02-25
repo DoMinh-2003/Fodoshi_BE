@@ -1,5 +1,6 @@
 package com.BE.controller;
 
+import com.BE.enums.ProductStatus;
 import com.BE.model.entity.Product;
 import com.BE.model.entity.User;
 import com.BE.model.request.ProductRequestDTO;
@@ -45,9 +46,9 @@ class ProductController {
     }
 
 
-    @PatchMapping("/status")
-    public ResponseEntity getProductByStatus(@Valid @RequestBody ProductStatusRequest statusRequest) {
-        return ResponseEntity.ok(productService.getProductByStatus(statusRequest));
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> getProductByStatus(@PathVariable ProductStatus status) {
+        return ResponseEntity.ok(productService.getProductByStatus(status));
     }
 
     @DeleteMapping("{id}")

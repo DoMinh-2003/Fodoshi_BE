@@ -139,8 +139,8 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public List<Product> getProductByStatus(ProductStatusRequest statusRequest) {
-        return  productRepository.findAllByStatus(statusRequest.getStatus());
+        public List<Product> getProductByStatus(ProductStatus statusRequest) {
+        return  productRepository.findAllByStatus(statusRequest);
     }
 
 
