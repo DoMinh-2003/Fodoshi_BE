@@ -46,12 +46,16 @@ public class SecurityConfig  {
             "/api/forgot-password",
             "/api/status",
             "/api/refresh",
-            "/api/logout"
+            "/api/logout",
+            "/api/products/status"
 
     };
 
     private final String[] PUBLIC_ENDPOINTS_METHOD = {
-            "/api/testRole"
+            "/api/testRole",
+            "/api/products/**",
+            "/api/categories/**",
+            "/api/brands/**"
     };
 
     @Autowired

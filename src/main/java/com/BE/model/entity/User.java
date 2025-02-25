@@ -46,9 +46,36 @@ public class User implements UserDetails {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    Cart cart;
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    Set<Order> orders = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "consignor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    Set<Product> product = new HashSet<>();
+
+
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     Set<RefreshToken> refreshTokens = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Report> reports = new HashSet<>();
+
+
+
+    @OneToMany(mappedBy = "consignor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Transaction> transactions = new HashSet<>();
 
 
 

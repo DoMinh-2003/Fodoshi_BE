@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
@@ -29,9 +30,10 @@ public class Filter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         String method = request.getMethod();
 
-        boolean isPublicEndpoint = PUBLIC_ENDPOINTS.stream().anyMatch(publicEndpoint -> requestURI.startsWith(publicEndpoint));
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        boolean isPublicEndpoint = PUBLIC_ENDPOINTS.stream().anyMatch(publicEndpoint -> pathMatcher.match(publicEndpoint, requestURI));
 
-        boolean isPublicEndpointMethod = PUBLIC_ENDPOINTS_METHOD.stream().anyMatch(publicEndpoint -> requestURI.startsWith(publicEndpoint));
+        boolean isPublicEndpointMethod = PUBLIC_ENDPOINTS_METHOD.stream().anyMatch(publicEndpoint -> pathMatcher.match(publicEndpoint, requestURI));
         boolean checkis = isPublicEndpointMethod && "GET".equals(method);
 
         if (isPublicEndpoint || checkis) {

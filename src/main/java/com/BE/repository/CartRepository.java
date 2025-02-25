@@ -1,8 +1,11 @@
 package com.BE.repository;
 
-import com.BE.model.entity.ConsignmentRequest;
+import com.BE.model.entity.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface ConsignmentRequestRepository extends JpaRepository<ConsignmentRequest, Long> {}
+public interface CartRepository extends JpaRepository<Cart, UUID> {
+}

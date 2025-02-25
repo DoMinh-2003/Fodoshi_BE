@@ -1,5 +1,6 @@
 package com.BE.exception.handler;
 
+import com.BE.exception.exceptions.DuplicateException;
 import com.BE.exception.exceptions.EnumValidationException;
 import com.BE.exception.exceptions.InvalidRefreshTokenException;
 import com.BE.exception.exceptions.NotFoundException;
@@ -99,6 +100,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<String> handleInvalidRefreshTokenException(InvalidRefreshTokenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<Object> handleDuplicateException(DuplicateException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
 }

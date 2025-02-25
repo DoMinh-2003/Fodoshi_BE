@@ -1,6 +1,5 @@
 package com.BE.model.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -17,8 +16,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
-public class Category {
+@Table(name = "brands")
+public class Brand {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +29,8 @@ public class Category {
 
     private Boolean isDeleted = false;
 
-    @ManyToMany(mappedBy = "categories")
+
+    @ManyToMany(mappedBy = "brands")
     @JsonBackReference
     private Set<Product> products = new HashSet<>();
 }

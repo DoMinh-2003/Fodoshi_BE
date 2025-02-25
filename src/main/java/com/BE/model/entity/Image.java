@@ -1,12 +1,9 @@
 package com.BE.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -14,15 +11,16 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Tag {
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String tagName;
 
-    @ManyToMany(mappedBy = "tags")
-    @JsonBackReference
-    Set<Product> products = new HashSet<>();
+    @Column(nullable = false)
+    private String image;
 
+    @ManyToOne
+    @JsonIgnore
+    Product product;
 }

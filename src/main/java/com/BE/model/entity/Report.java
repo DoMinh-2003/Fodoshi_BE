@@ -1,6 +1,7 @@
 package com.BE.model.entity;
 
 import com.BE.enums.ReportStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -6,6 +6,7 @@ import com.BE.exception.exceptions.BadRequestException;
 import com.BE.exception.exceptions.InvalidRefreshTokenException;
 import com.BE.mapper.UserMapper;
 import com.BE.model.EmailDetail;
+import com.BE.model.entity.Cart;
 import com.BE.model.request.*;
 import com.BE.model.response.AuthenResponse;
 import com.BE.model.response.AuthenticationResponse;
@@ -61,11 +62,16 @@ public class AuthenticationImpl implements IAuthenticationService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserRole.CONSIGNOR);
+
+        Cart cart = new Cart();
+        cart.setUser(user);
+        user.setCart(cart);
+
        try {
            return userRepository.save(user);
        }catch (DataIntegrityViolationException e){
            System.out.println(e.getMessage());
-           throw new DataIntegrityViolationException("Duplicate UserName");
+           throw new DataIntegrityViolationException("Duplicate");
        }
     }
 //    @Cacheable()
