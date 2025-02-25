@@ -74,6 +74,7 @@ public class ProductService {
         product.setStatus(productDTO.getProductStatus());
         product.setOriginalPrice(productDTO.getOriginalPrice());
         product.setSellingPrice(productDTO.getSellingPrice());
+        product.setMainImage(productDTO.getMainImage());
         product.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         product.setGender(productDTO.getGender());
         if(productDTO.getProductStatus().equals(ProductStatus.PENDING)){
@@ -106,6 +107,7 @@ public class ProductService {
         product.setProductCondition(productDTO.getCondition());
         product.setSize(productDTO.getSize());
         product.setColor(productDTO.getColor());
+        product.setMainImage(productDTO.getMainImage());
         List<Image> images = imageRepository.findAllByProductId(product.getId());
         imageRepository.deleteAll(images);
         List<Tag> tags = tagRepository.findAllByProductsId(product.getId());

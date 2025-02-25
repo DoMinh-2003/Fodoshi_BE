@@ -61,6 +61,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<Image> imageUrls = new HashSet<>();
 
+    @Column(nullable = false)
+    private String mainImage; // Ảnh chính
+
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "product_tag",

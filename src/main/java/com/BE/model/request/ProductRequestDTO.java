@@ -26,6 +26,7 @@ public class ProductRequestDTO {
     private Gender gender;
     public BigDecimal originalPrice;
     public BigDecimal sellingPrice;
+    private String mainImage;
     @Enumerated(EnumType.STRING)
     ProductStatus productStatus;
     public List<String> tags;
