@@ -28,7 +28,7 @@ package com.BE.controller;
         import vn.payos.type.PaymentLinkData;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("api/payment")
 @SecurityRequirement(name = "api")
 
 public class OrderPayosController {
@@ -47,8 +47,12 @@ public class OrderPayosController {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
         try {
-            OrderResponse orderResponse =  orderService.created(RequestBody.getCartItemIds());
-
+            OrderResponse orderResponse = new OrderResponse();
+            if(RequestBody.getProductId() == null){
+                orderResponse =  orderService.created(RequestBody.getCartItemIds(),RequestBody.getAddressId());
+            }else{
+                orderResponse =  orderService.payment(RequestBody.getProductId(),RequestBody.getAddressId());
+            }
             final String description = RequestBody.getDescription();
             final String returnUrl = RequestBody.getReturnUrl() + "?orderId=" + orderResponse.getId();
             final String cancelUrl = RequestBody.getCancelUrl();
@@ -56,15 +60,15 @@ public class OrderPayosController {
             // Gen order code
             String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
             long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
-                List<ItemData> itemDataList = new ArrayList<>();
-            for (OrderItem orderItem: orderResponse.getOrderItems()) {
-                ItemData item = ItemData.builder().name(orderItem.getProduct().getName()).price(orderItem.getPrice().intValueExact()).quantity(1).build();
-                itemDataList.add(item);
-            }
 
+                    List<ItemData> itemDataList = new ArrayList<>();
+                    for (OrderItem orderItem: orderResponse.getOrderItems()) {
+                        ItemData item = ItemData.builder().name(orderItem.getProduct().getName()).price(orderItem.getPrice().intValueExact()).quantity(1).build();
+                        itemDataList.add(item);
+                    }
+                    PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
+                            .items(itemDataList).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
 
-            PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                    .items(itemDataList).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
 
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
 
