@@ -35,6 +35,10 @@ public class Order {
     @JoinColumn(name = "user_id")
     User user;
 
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    Address address;
+
     @OneToMany(mappedBy = "order",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     Set<OrderItem> orderItems = new HashSet<>();
 

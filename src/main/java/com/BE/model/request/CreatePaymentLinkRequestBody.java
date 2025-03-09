@@ -16,6 +16,8 @@ public class CreatePaymentLinkRequestBody {
     private String description;
     @NotNull(message = "productId cannot be null")
     private Long productId;
+    @NotNull(message = "addressId cannot be null")
+    private Long addressId;
     @NotNull(message = "cartItemIds cannot be null")
     List<UUID> cartItemIds;
     private String returnUrl;

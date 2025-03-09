@@ -49,9 +49,9 @@ public class OrderPayosController {
         try {
             OrderResponse orderResponse = new OrderResponse();
             if(RequestBody.getProductId() == null){
-                orderResponse =  orderService.created(RequestBody.getCartItemIds());
+                orderResponse =  orderService.created(RequestBody.getCartItemIds(),RequestBody.getAddressId());
             }else{
-                orderResponse =  orderService.payment(RequestBody.getProductId());
+                orderResponse =  orderService.payment(RequestBody.getProductId(),RequestBody.getAddressId());
             }
             final String description = RequestBody.getDescription();
             final String returnUrl = RequestBody.getReturnUrl() + "?orderId=" + orderResponse.getId();

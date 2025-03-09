@@ -40,9 +40,12 @@ public class OrderService {
     CartItemRepository cartItemRepository;
 
     @Autowired
-    ProductService productService ;
+    ProductService productService;
 
-    public OrderResponse created(List<UUID> cartItemIds) {
+    @Autowired
+    AddressService addressService;
+
+    public OrderResponse created(List<UUID> cartItemIds,Long addressId) {
 
         User account = accountUtils.getCurrentUser();
         Order order = new Order();
@@ -50,6 +53,8 @@ public class OrderService {
         order.setCreatedAt(dateNowUtils.dateNow());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setUser(account);
+        Address address = addressService.getAddressById(addressId);
+        order.setAddress(address);
 
         cartItemIds.stream().forEach((cartItemId) -> {
             CartItem cartItem = cartItemRepository.findByIdAndStatus(cartItemId, CartItemStatus.ADDED).orElseThrow(() -> new NotFoundException("CartItem not found"));
@@ -66,12 +71,14 @@ public class OrderService {
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    public OrderResponse payment(Long id){
+    public OrderResponse payment(Long id,Long addressId){
         Product product = productService.getProductById(id);
 
         User account = accountUtils.getCurrentUser();
         Order order = new Order();
         OrderItem orderItem = new OrderItem();
+        Address address = addressService.getAddressById(addressId);
+        order.setAddress(address);
 
         order.setCreatedAt(dateNowUtils.dateNow());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
