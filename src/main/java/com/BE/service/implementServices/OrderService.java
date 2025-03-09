@@ -41,7 +41,7 @@ public class OrderService {
     @Autowired
     CartItemRepository cartItemRepository;
 
-    public OrderResponse created(OrderRequest orderRequest) {
+    public OrderResponse created(List<UUID> cartItemIds) {
 
         User account = accountUtils.getCurrentUser();
         Order order = new Order();
@@ -50,7 +50,7 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setUser(account);
 
-        orderRequest.getCartItemIds().stream().forEach((cartItemId) -> {
+        cartItemIds.stream().forEach((cartItemId) -> {
             CartItem cartItem = cartItemRepository.findByIdAndStatus(cartItemId, CartItemStatus.ADDED).orElseThrow(() -> new NotFoundException("CartItem not found"));
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);

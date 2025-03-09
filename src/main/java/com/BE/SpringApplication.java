@@ -13,8 +13,8 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 @SecurityScheme(name = "api", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 @OpenAPIDefinition(
-		info = @Info(title = "Do Minh API", version = "2.0"),
-		servers = {
+		info = @Info(title = "Do Minh API", version = "2.0")
+		, servers = {
 				@Server(url = "https://fodoshi.shop", description = "Production Server") // Sử dụng HTTPS
 		}
 )

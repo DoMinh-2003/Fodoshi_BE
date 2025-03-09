@@ -30,10 +30,10 @@ public class OrderController {
     @Autowired
     ResponseHandler responseHandler;
 
-    @PostMapping
-    public ResponseEntity created(@Valid @RequestBody OrderRequest orderRequest) {
-        return responseHandler.response(200, "Created Order Successfully!", orderService.created(orderRequest));
-    }
+//    @PostMapping
+//    public ResponseEntity created(@Valid @RequestBody OrderRequest orderRequest) {
+//        return responseHandler.response(200, "Created Order Successfully!", orderService.created(orderRequest));
+//    }
 
     @GetMapping("{id}")
     public ResponseEntity getdetail(@PathVariable UUID id) {

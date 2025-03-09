@@ -1,6 +1,7 @@
 package com.BE.controller;
 
 import com.BE.model.request.ProductStatusRequest;
+import com.BE.service.implementServices.ProductService;
 import com.BE.service.implementServices.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -16,9 +17,17 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    ProductService productService;
+
     @GetMapping("/phone/{phone}")
     public ResponseEntity getProductByStatus(@PathVariable String phone) {
         return ResponseEntity.ok(userService.getUserByPhone(phone));
+    }
+
+    @GetMapping("/products")
+    public ResponseEntity getProductByConsignor() {
+        return ResponseEntity.ok(productService.getProductByConsignor());
     }
 
 }

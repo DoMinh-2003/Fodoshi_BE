@@ -48,6 +48,7 @@ public class CategoryService {
 
     public Category deleteCategory(Long id) {
         Category category = getCategoryById(id);
+        category.setIsDeleted(true);
         return categoryRepository.save(category);
     }
 }
