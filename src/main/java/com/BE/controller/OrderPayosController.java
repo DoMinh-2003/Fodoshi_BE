@@ -28,7 +28,7 @@ package com.BE.controller;
         import vn.payos.type.PaymentLinkData;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("api/payment")
 @SecurityRequirement(name = "api")
 
 public class OrderPayosController {
