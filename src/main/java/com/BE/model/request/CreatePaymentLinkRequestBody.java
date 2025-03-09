@@ -14,6 +14,8 @@ import java.util.UUID;
 @Setter
 public class CreatePaymentLinkRequestBody {
     private String description;
+    @NotNull(message = "productId cannot be null")
+    private Long productId;
     @NotNull(message = "cartItemIds cannot be null")
     List<UUID> cartItemIds;
     private String returnUrl;

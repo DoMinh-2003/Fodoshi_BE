@@ -6,15 +6,13 @@ import com.BE.enums.CartItemStatus;
 import com.BE.enums.OrderStatus;
 import com.BE.exception.exceptions.NotFoundException;
 import com.BE.mapper.OrderMapper;
-import com.BE.model.entity.CartItem;
-import com.BE.model.entity.Order;
-import com.BE.model.entity.OrderItem;
-import com.BE.model.entity.User;
+import com.BE.model.entity.*;
 import com.BE.model.request.OrderRequest;
 import com.BE.model.request.OrderStatusRequest;
 import com.BE.model.response.OrderResponse;
 import com.BE.repository.CartItemRepository;
 import com.BE.repository.OrderRepository;
+import com.BE.repository.ProductRepository;
 import com.BE.utils.AccountUtils;
 import com.BE.utils.DateNowUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +39,9 @@ public class OrderService {
     @Autowired
     CartItemRepository cartItemRepository;
 
+    @Autowired
+    ProductService productService ;
+
     public OrderResponse created(List<UUID> cartItemIds) {
 
         User account = accountUtils.getCurrentUser();
@@ -62,6 +63,24 @@ public class OrderService {
             cartItemRepository.save(cartItem);
         });
 
+        return orderMapper.toOrderResponse(orderRepository.save(order));
+    }
+
+    public OrderResponse payment(Long id){
+        Product product = productService.getProductById(id);
+
+        User account = accountUtils.getCurrentUser();
+        Order order = new Order();
+        OrderItem orderItem = new OrderItem();
+
+        order.setCreatedAt(dateNowUtils.dateNow());
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+        order.setUser(account);
+        orderItem.setOrder(order);
+        orderItem.setProduct(product);
+        orderItem.setPrice(product.getSellingPrice());
+        order.setTotalPrice(order.getTotalPrice().add(product.getSellingPrice()));
+        order.getOrderItems().add(orderItem);
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
