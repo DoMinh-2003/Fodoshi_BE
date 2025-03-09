@@ -1,9 +1,15 @@
 package com.BE.controller;
+        import java.util.ArrayList;
         import java.util.Date;
+        import java.util.List;
         import java.util.Map;
 
+        import com.BE.model.entity.OrderItem;
         import com.BE.model.request.CreatePaymentLinkRequestBody;
+        import com.BE.model.response.OrderResponse;
+        import com.BE.service.implementServices.OrderService;
         import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+        import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.web.bind.annotation.GetMapping;
         import org.springframework.web.bind.annotation.PathVariable;
         import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +34,9 @@ package com.BE.controller;
 public class OrderPayosController {
     private final PayOS payOS;
 
+    @Autowired
+    OrderService orderService;
+
     public OrderPayosController(PayOS payOS) {
         super();
         this.payOS = payOS;
@@ -38,19 +47,24 @@ public class OrderPayosController {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
         try {
-            final String productName = RequestBody.getProductName();
+            OrderResponse orderResponse =  orderService.created(RequestBody.getCartItemIds());
+
             final String description = RequestBody.getDescription();
-            final String returnUrl = RequestBody.getReturnUrl();
+            final String returnUrl = RequestBody.getReturnUrl() + "?orderId=" + orderResponse.getId();
             final String cancelUrl = RequestBody.getCancelUrl();
-            final int price = RequestBody.getPrice();
+            final int price = orderResponse.getTotalPrice().intValueExact();
             // Gen order code
             String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
             long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+                List<ItemData> itemDataList = new ArrayList<>();
+            for (OrderItem orderItem: orderResponse.getOrderItems()) {
+                ItemData item = ItemData.builder().name(orderItem.getProduct().getName()).price(orderItem.getPrice().intValueExact()).quantity(1).build();
+                itemDataList.add(item);
+            }
 
-            ItemData item = ItemData.builder().name(productName).price(price).quantity(1).build();
 
             PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                    .item(item).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
+                    .items(itemDataList).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
 
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
 

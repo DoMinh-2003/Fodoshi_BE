@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@SecurityRequirement(name ="api")
 @RequestMapping("api/products")
+@SecurityRequirement(name ="api")
 class ProductController {
 
 
     @Autowired
-    private ProductService productService;
+    ProductService productService;
 
     @Autowired
     ProductRepository productRepository;
@@ -50,6 +50,8 @@ class ProductController {
     public ResponseEntity<?> getProductByStatus(@PathVariable ProductStatus status) {
         return ResponseEntity.ok(productService.getProductByStatus(status));
     }
+
+
 
     @DeleteMapping("{id}")
     public ResponseEntity deleteProduct(@PathVariable Long id) {

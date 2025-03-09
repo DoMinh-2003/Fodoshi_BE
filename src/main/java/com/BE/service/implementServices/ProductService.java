@@ -37,6 +37,9 @@ public class ProductService {
     @Autowired
     ImageRepository imageRepository;
 
+    @Autowired
+    AccountUtils accountUtils;
+
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
@@ -167,4 +170,8 @@ public class ProductService {
     }
 
 
+    public List<Product> getProductByConsignor() {
+        User user = accountUtils.getCurrentUser();
+        return productRepository.findAllByConsignorId(user.getId());
+    }
 }
