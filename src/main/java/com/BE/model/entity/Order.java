@@ -25,7 +25,7 @@ public class Order {
     @UuidGenerator
     UUID id;
 
-    BigDecimal totalPrice;
+    BigDecimal totalPrice = BigDecimal.ZERO;
     String createdAt;
 
     @Enumerated(EnumType.STRING)
