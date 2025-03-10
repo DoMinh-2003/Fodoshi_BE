@@ -107,4 +107,8 @@ public class OrderService {
         order.setStatus(statusRequest.getStatus());
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
+
+    public List<OrderResponse> getAll() {
+        return orderMapper.toOrderResponses(orderRepository.findAll());
+    }
 }

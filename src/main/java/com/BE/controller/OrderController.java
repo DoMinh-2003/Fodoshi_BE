@@ -40,6 +40,11 @@ public class OrderController {
         return responseHandler.response(200, "Get OrderDetail Successfully!", orderService.getdetail(id));
     }
 
+    @GetMapping
+    public ResponseEntity getAll() {
+        return responseHandler.response(200, "Get All Order Successfully!", orderService.getAll());
+    }
+
     @GetMapping("/account")
     public ResponseEntity getByAccount() {
         return responseHandler.response(200, "Get Order By Account Successfully!", orderService.getByAccount());
