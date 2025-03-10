@@ -64,8 +64,7 @@ public class OrderService {
             orderItem.setPrice(cartItem.getProduct().getSellingPrice());
             order.setTotalPrice(order.getTotalPrice().add(cartItem.getProduct().getSellingPrice()));
             order.getOrderItems().add(orderItem);
-            cartItem.setStatus(CartItemStatus.PURCHASED);
-            cartItemRepository.save(cartItem);
+
         });
 
         return orderMapper.toOrderResponse(orderRepository.save(order));
@@ -104,6 +103,21 @@ public class OrderService {
 
     public OrderResponse changeStatus(UUID id, OrderStatusRequest statusRequest) {
         Order order = orderRepository.findByIdAndStatus(id,OrderStatus.PENDING_PAYMENT).orElseThrow(() -> new NotFoundException("Order Not found"));
+        User account = accountUtils.getCurrentUser();
+
+
+        if(statusRequest.getStatus().equals(OrderStatus.PAID)){
+            account.getCart().getCartItems().stream().forEach((cartItem) -> {
+                order.getOrderItems().stream().forEach((orderItem) -> {
+                    if(cartItem.getProduct().getId().equals(orderItem.getProduct().getId())){
+                        cartItem.setStatus(CartItemStatus.PURCHASED);
+                        cartItemRepository.save(cartItem);
+                    }
+                });
+            });
+        }
+
+
         order.setStatus(statusRequest.getStatus());
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }

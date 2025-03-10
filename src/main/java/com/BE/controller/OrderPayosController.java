@@ -43,10 +43,10 @@ public class OrderPayosController {
     }
 
     @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody RequestBody) {
+    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody RequestBody) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
-        try {
+
             OrderResponse orderResponse = new OrderResponse();
             if(RequestBody.getProductId() == null){
                 orderResponse =  orderService.created(RequestBody.getCartItemIds(),RequestBody.getAddressId());
@@ -77,14 +77,7 @@ public class OrderPayosController {
             response.set("data", objectMapper.valueToTree(data));
             return response;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("error", -1);
-            response.put("message", "fail");
-            response.set("data", null);
-            return response;
 
-        }
     }
 
     @GetMapping(path = "/{orderId}")
