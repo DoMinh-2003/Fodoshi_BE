@@ -2,6 +2,7 @@ package com.BE.model.response;
 
 import com.BE.enums.OrderStatus;
 import com.BE.model.entity.OrderItem;
+import com.BE.model.entity.User;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
@@ -29,7 +30,7 @@ public class OrderResponse {
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
-//    Account account;
+    User user;
 
     Set<OrderItem> orderItems = new HashSet<>();
 }
