@@ -1,36 +1,29 @@
 package com.BE.controller;
-        import java.util.ArrayList;
-        import java.util.Date;
-        import java.util.List;
-        import java.util.Map;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-        import com.BE.model.entity.OrderItem;
-        import com.BE.model.request.CreatePaymentLinkRequestBody;
-        import com.BE.model.response.OrderResponse;
-        import com.BE.service.implementServices.OrderService;
-        import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-        import org.springframework.beans.factory.annotation.Autowired;
-        import org.springframework.web.bind.annotation.GetMapping;
-        import org.springframework.web.bind.annotation.PathVariable;
-        import org.springframework.web.bind.annotation.PostMapping;
-        import org.springframework.web.bind.annotation.PutMapping;
-        import org.springframework.web.bind.annotation.RequestBody;
-        import org.springframework.web.bind.annotation.RequestMapping;
-        import org.springframework.web.bind.annotation.RestController;
+import com.BE.model.entity.Address;
+import com.BE.model.entity.OrderItem;
+import com.BE.model.request.CreatePaymentLinkRequestBody;
+import com.BE.model.response.OrderResponse;
+import com.BE.service.implementServices.OrderService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-        import com.fasterxml.jackson.databind.ObjectMapper;
-        import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-        import vn.payos.PayOS;
-        import vn.payos.type.CheckoutResponseData;
-        import vn.payos.type.ItemData;
-        import vn.payos.type.PaymentData;
-        import vn.payos.type.PaymentLinkData;
+import vn.payos.PayOS;
+import vn.payos.type.CheckoutResponseData;
+import vn.payos.type.ItemData;
+import vn.payos.type.PaymentData;
+import vn.payos.type.PaymentLinkData;
 
 @RestController
 @RequestMapping("api/payment")
-@SecurityRequirement(name = "api")
-
 public class OrderPayosController {
     private final PayOS payOS;
 
@@ -42,45 +35,94 @@ public class OrderPayosController {
         this.payOS = payOS;
     }
 
-    @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody RequestBody) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode response = objectMapper.createObjectNode();
-
-            OrderResponse orderResponse = new OrderResponse();
-            if(RequestBody.getProductId() == null){
-                orderResponse =  orderService.created(RequestBody.getCartItemIds(),RequestBody.getAddressId());
-            }else{
-                orderResponse =  orderService.payment(RequestBody.getProductId(),RequestBody.getAddressId());
-            }
-            final String description = RequestBody.getDescription();
-            final String returnUrl = RequestBody.getReturnUrl() + "?orderId=" + orderResponse.getId();
-            final String cancelUrl = RequestBody.getCancelUrl();
-            final int price = orderResponse.getTotalPrice().intValueExact();
-            // Gen order code
-            String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
-            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
-
-                    List<ItemData> itemDataList = new ArrayList<>();
-                    for (OrderItem orderItem: orderResponse.getOrderItems()) {
-                        ItemData item = ItemData.builder().name(orderItem.getProduct().getName()).price(orderItem.getPrice().intValueExact()).quantity(1).build();
-                        itemDataList.add(item);
-                    }
-                    PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                            .items(itemDataList).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
-
-
-            CheckoutResponseData data = payOS.createPaymentLink(paymentData);
-
-            response.put("error", 0);
-            response.put("message", "success");
-            response.set("data", objectMapper.valueToTree(data));
-            return response;
-
-
+    // Guest checkout endpoint - no security requirement
+    @PostMapping(path = "/create/guest")
+    public ObjectNode createGuestPaymentLink(@RequestBody CreatePaymentLinkRequestBody requestBody) throws Exception {
+        // Guest checkout flow
+        List<Long> productIds = new ArrayList<>();
+        if (requestBody.getProductId() != null) {
+            // Single product checkout
+            productIds.add(requestBody.getProductId());
+        } else if (requestBody.getProductIds() != null && !requestBody.getProductIds().isEmpty()) {
+            // Multiple products checkout
+            productIds.addAll(requestBody.getProductIds());
+        }
+        
+        // Create guest address with contact information
+        Address guestAddress = requestBody.getGuestAddress();
+        guestAddress.setGuestName(requestBody.getGuestName());
+        guestAddress.setGuestEmail(requestBody.getGuestEmail());
+        guestAddress.setGuestPhone(requestBody.getGuestPhone());
+        
+        // Create guest order
+        OrderResponse orderResponse = orderService.createGuestOrder(productIds, guestAddress);
+        
+        // Process payment using common method
+        return processPayment(orderResponse, requestBody);
     }
 
+    // Authenticated user checkout - requires security
+    @PostMapping(path = "/create")
+    @SecurityRequirement(name = "api")
+    public ObjectNode createAuthenticatedPaymentLink(@RequestBody CreatePaymentLinkRequestBody requestBody) throws Exception {
+        OrderResponse orderResponse;
+        
+        // Authenticated user flow
+        if (requestBody.getProductId() == null) {
+            orderResponse = orderService.created(requestBody.getCartItemIds(), requestBody.getAddressId());
+        } else {
+            orderResponse = orderService.payment(requestBody.getProductId(), requestBody.getAddressId());
+        }
+        
+        // Process payment using common method
+        return processPayment(orderResponse, requestBody);
+    }
+    
+    // Common payment processing method to avoid code duplication
+    private ObjectNode processPayment(OrderResponse orderResponse, CreatePaymentLinkRequestBody requestBody) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode response = objectMapper.createObjectNode();
+        
+        // Payment processing
+        final String description = requestBody.getDescription();
+        final String returnUrl = requestBody.getReturnUrl() + "?orderId=" + orderResponse.getId();
+        final String cancelUrl = requestBody.getCancelUrl();
+        final int price = orderResponse.getTotalPrice().intValueExact();
+        
+        // Generate order code
+        String currentTimeString = String.valueOf(new Date().getTime());
+        long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+        
+        List<ItemData> itemDataList = new ArrayList<>();
+        for (OrderItem orderItem: orderResponse.getOrderItems()) {
+            ItemData item = ItemData.builder()
+                .name(orderItem.getProduct().getName())
+                .price(orderItem.getPrice().intValueExact())
+                .quantity(1)
+                .build();
+            itemDataList.add(item);
+        }
+        
+        PaymentData paymentData = PaymentData.builder()
+            .orderCode(orderCode)
+            .description(description)
+            .amount(price)
+            .items(itemDataList)
+            .returnUrl(returnUrl)
+            .cancelUrl(cancelUrl)
+            .build();
+
+        CheckoutResponseData data = payOS.createPaymentLink(paymentData);
+
+        response.put("error", 0);
+        response.put("message", "success");
+        response.set("data", objectMapper.valueToTree(data));
+        return response;
+    }
+
+    // Secure these existing endpoints with the security requirement
     @GetMapping(path = "/{orderId}")
+    @SecurityRequirement(name = "api")
     public ObjectNode getOrderById(@PathVariable("orderId") long orderId) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
@@ -99,10 +141,10 @@ public class OrderPayosController {
             response.set("data", null);
             return response;
         }
-
     }
 
     @PutMapping(path = "/{orderId}")
+    @SecurityRequirement(name = "api")
     public ObjectNode cancelOrder(@PathVariable("orderId") int orderId) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
@@ -122,6 +164,7 @@ public class OrderPayosController {
     }
 
     @PostMapping(path = "/confirm-webhook")
+    @SecurityRequirement(name = "api")
     public ObjectNode confirmWebhook(@RequestBody Map<String, String> requestBody) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();

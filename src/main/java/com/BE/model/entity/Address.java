@@ -31,10 +31,14 @@ public class Address {
     Boolean isDeleted = false;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = true) // Make nullable to support guest addresses
     @JsonIgnore
     User user;
 
+    // Add guest-specific fields
+    String guestName;
+    String guestPhone;
+    String guestEmail;
 
     @JsonIgnore
     @OneToMany(mappedBy = "address",cascade = CascadeType.ALL)

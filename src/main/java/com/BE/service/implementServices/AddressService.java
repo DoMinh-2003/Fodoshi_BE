@@ -53,4 +53,9 @@ public class AddressService {
         return addressRepository.save(address);
 
     }
+
+    public Address saveAddress(Address address) {
+        // Save address without requiring a user
+        return addressRepository.save(address);
+    }
 }

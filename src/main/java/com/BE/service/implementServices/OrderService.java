@@ -18,6 +18,7 @@ import com.BE.utils.DateNowUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,5 +125,55 @@ public class OrderService {
 
     public List<OrderResponse> getAll() {
         return orderMapper.toOrderResponses(orderRepository.findAll());
+    }
+
+    public OrderResponse createGuestOrder(List<Long> productIds, Address guestAddress) {
+        Order order = new Order();
+        
+        // Create and save guest address
+        guestAddress.setUser(null); // No user for guest address
+        Address savedAddress = addressService.saveAddress(guestAddress);
+        order.setAddress(savedAddress);
+        
+        // Set order metadata
+        order.setCreatedAt(dateNowUtils.dateNow());
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+        order.setUser(null); // No user for guest order
+        order.setTotalPrice(BigDecimal.ZERO); // Initialize total price
+        
+        // Add products to order
+        if (productIds != null && !productIds.isEmpty()) {
+            productIds.forEach(productId -> {
+                Product product = productService.getProductById(productId);
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(order);
+                orderItem.setProduct(product);
+                orderItem.setPrice(product.getSellingPrice());
+                order.setTotalPrice(order.getTotalPrice().add(product.getSellingPrice()));
+                order.getOrderItems().add(orderItem);
+            });
+        }
+        
+        return orderMapper.toOrderResponse(orderRepository.save(order));
+    }
+
+    public OrderResponse changeGuestOrderStatus(UUID id, OrderStatusRequest statusRequest, String guestEmail) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Order not found"));
+        
+        // Verify this is a guest order
+        if (order.getUser() != null) {
+            throw new IllegalArgumentException("This is not a guest order");
+        }
+        
+        // Verify the guest email matches
+        Address address = order.getAddress();
+        if (address == null || !guestEmail.equals(address.getGuestEmail())) {
+//            throw new UnauthorizedException("Invalid guest credentials");
+        }
+        
+        // Update the order status
+        order.setStatus(statusRequest.getStatus());
+        return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 }

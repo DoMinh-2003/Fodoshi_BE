@@ -55,7 +55,17 @@ public class OrderController {
         return responseHandler.response(200, "Change Order Status Successfully!", orderService.changeStatus(id,statusRequest));
     }
 
-
+    @PatchMapping("{id}/status/guest")
+    public ResponseEntity changeGuestStatus(
+            @PathVariable UUID id, 
+            @Valid @RequestBody OrderStatusRequest statusRequest,
+            @RequestParam String guestEmail) {
+        return responseHandler.response(
+            200, 
+            "Change Guest Order Status Successfully!", 
+            orderService.changeGuestOrderStatus(id, statusRequest, guestEmail)
+        );
+    }
 
 
 
