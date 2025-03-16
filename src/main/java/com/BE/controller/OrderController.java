@@ -6,6 +6,7 @@ import com.BE.model.request.OrderStatusRequest;
 import com.BE.service.implementServices.OrderService;
 import com.BE.utils.ResponseHandler;
 
+import io.grpc.internal.JsonUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -55,14 +56,14 @@ public class OrderController {
         return responseHandler.response(200, "Change Order Status Successfully!", orderService.changeStatus(id,statusRequest));
     }
 
-    @PatchMapping("{id}/status/guest")
+    @PatchMapping("status/guest/{id}")
     public ResponseEntity changeGuestStatus(
             @PathVariable UUID id, 
             @Valid @RequestBody OrderStatusRequest statusRequest,
-            @RequestParam String guestEmail) {
+            @RequestParam(required = false) String guestEmail) {
         return responseHandler.response(
             200, 
-            "Change Guest Order Status Successfully!", 
+            "Change Guest Order Status Successfully!",
             orderService.changeGuestOrderStatus(id, statusRequest, guestEmail)
         );
     }

@@ -166,11 +166,7 @@ public class OrderService {
             throw new IllegalArgumentException("This is not a guest order");
         }
         
-        // Verify the guest email matches
-        Address address = order.getAddress();
-        if (address == null || !guestEmail.equals(address.getGuestEmail())) {
-//            throw new UnauthorizedException("Invalid guest credentials");
-        }
+
         
         // Update the order status
         order.setStatus(statusRequest.getStatus());

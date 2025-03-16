@@ -48,8 +48,7 @@ public class SecurityConfig  {
             "/api/refresh",
             "/api/logout",
             "/api/payment/create/guest",
-            "/api/order/**/status/guest",
-            "/api/order/**",
+            "/api/order/status/guest/**",
     };
 
     private final String[] PUBLIC_ENDPOINTS_METHOD = {
@@ -58,8 +57,9 @@ public class SecurityConfig  {
             "/api/categories/**",
             "/api/brands/**",
             "/api/products/status/**",
-            "/api/order/**/status/guest",
+            "/api/order/**",
             "/api/payment/create/guest",
+            "/api/order/status/guest/**",
     };
 
     @Autowired

@@ -35,7 +35,7 @@ public class Filter extends OncePerRequestFilter {
 
         boolean isPublicEndpointMethod = PUBLIC_ENDPOINTS_METHOD.stream().anyMatch(publicEndpoint -> pathMatcher.match(publicEndpoint, requestURI));
         boolean checkis = isPublicEndpointMethod && "GET".equals(method);
-
+        System.out.println(requestURI);
         if (isPublicEndpoint || checkis) {
             jakarta.servlet.http.HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request) {
                 @Override
