@@ -5,10 +5,7 @@ import com.BE.exception.exceptions.NotFoundException;
 import com.BE.model.entity.*;
 import com.BE.model.request.ProductRequestDTO;
 import com.BE.model.request.ProductStatusRequest;
-import com.BE.repository.ImageRepository;
-import com.BE.repository.ProductRepository;
-import com.BE.repository.TagRepository;
-import com.BE.repository.UserRepository;
+import com.BE.repository.*;
 import com.BE.utils.AccountUtils;
 import com.BE.utils.DateNowUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +36,9 @@ public class ProductService {
 
     @Autowired
     AccountUtils accountUtils;
+
+    @Autowired
+    ProductHistoryRepository productHistoryRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -80,11 +80,22 @@ public class ProductService {
         product.setMainImage(productDTO.getMainImage());
         product.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         product.setGender(productDTO.getGender());
+
+        ProductHistory productHistory = new ProductHistory();
+        productHistory.setCreatedAt(dateNowUtils.dateNow());
+        productHistory.setProduct(product);
+        productHistory.setStatus(productDTO.getProductStatus().name());
+
+        product.getProductHistories().add(productHistory);
+        productHistoryRepository.save(productHistory);
+
         if(productDTO.getProductStatus().equals(ProductStatus.PENDING)){
             product.setConsignor(user);
         }else{
             product.setConsignor(userRepository.findById(productDTO.getConsignorId()).orElseThrow(() -> new NotFoundException("user not found")));
         }
+
+
 
         return productRepository.save(product);
     }
@@ -134,6 +145,20 @@ public class ProductService {
         product.setSellingPrice(productDTO.getSellingPrice());
         product.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         product.setGender(productDTO.getGender());
+
+
+        if(!product.getStatus().equals(productDTO.getProductStatus())){
+            ProductHistory productHistory = new ProductHistory();
+            productHistory.setCreatedAt(dateNowUtils.dateNow());
+            productHistory.setProduct(product);
+            productHistory.setStatus(productDTO.getProductStatus().name());
+
+            product.getProductHistories().add(productHistory);
+            productHistoryRepository.save(productHistory);
+        }
+
+
+
         if(productDTO.getProductStatus().equals(ProductStatus.PENDING)){
             product.setConsignor(user);
         }else{
@@ -143,6 +168,8 @@ public class ProductService {
 
         return productRepository.save(product);
     }
+
+
 
         public List<Product> getProductByStatus(ProductStatus statusRequest) {
         return  productRepository.findAllByStatus(statusRequest);
@@ -173,5 +200,19 @@ public class ProductService {
     public List<Product> getProductByConsignor() {
         User user = accountUtils.getCurrentUser();
         return productRepository.findAllByConsignorId(user.getId());
+    }
+
+    public Product changeStatus(Long id, ProductStatusRequest status) {
+        Product product = getProductById(id);
+        product.setStatus(status.getStatus());
+
+        ProductHistory productHistory = new ProductHistory();
+        productHistory.setCreatedAt(dateNowUtils.dateNow());
+        productHistory.setProduct(product);
+        productHistory.setStatus(status.getStatus().name());
+
+        product.getProductHistories().add(productHistory);
+        productHistoryRepository.save(productHistory);
+        return productRepository.save(product);
     }
 }

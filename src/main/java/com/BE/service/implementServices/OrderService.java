@@ -4,15 +4,14 @@ package com.BE.service.implementServices;
 
 import com.BE.enums.CartItemStatus;
 import com.BE.enums.OrderStatus;
+import com.BE.enums.ShippingType;
 import com.BE.exception.exceptions.NotFoundException;
 import com.BE.mapper.OrderMapper;
 import com.BE.model.entity.*;
 import com.BE.model.request.OrderRequest;
 import com.BE.model.request.OrderStatusRequest;
 import com.BE.model.response.OrderResponse;
-import com.BE.repository.CartItemRepository;
-import com.BE.repository.OrderRepository;
-import com.BE.repository.ProductRepository;
+import com.BE.repository.*;
 import com.BE.utils.AccountUtils;
 import com.BE.utils.DateNowUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +40,21 @@ public class OrderService {
     CartItemRepository cartItemRepository;
 
     @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
     ProductService productService;
 
     @Autowired
     AddressService addressService;
 
-    public OrderResponse created(List<UUID> cartItemIds,Long addressId) {
+    @Autowired
+    OrderHistoryRepository orderHistoryRepository;
+
+    @Autowired
+    ProductHistoryRepository productHistoryRepository;
+
+    public OrderResponse created(List<UUID> cartItemIds, Long addressId , BigDecimal totalPrice , ShippingType shippingType) {
 
         User account = accountUtils.getCurrentUser();
         Order order = new Order();
@@ -63,15 +71,25 @@ public class OrderService {
             orderItem.setOrder(order);
             orderItem.setProduct(cartItem.getProduct());
             orderItem.setPrice(cartItem.getProduct().getSellingPrice());
-            order.setTotalPrice(order.getTotalPrice().add(cartItem.getProduct().getSellingPrice()));
             order.getOrderItems().add(orderItem);
 
         });
+        order.setShippingType(shippingType);
+        order.setTotalPrice(totalPrice);
+
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setOrder(order);
+        orderHistory.setStatus(OrderStatus.PENDING_PAYMENT);
+
+        order.getOrderHistories().add(orderHistory);
+
+        orderHistoryRepository.save(orderHistory);
 
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    public OrderResponse payment(Long id,Long addressId){
+    public OrderResponse payment(Long id,Long addressId, BigDecimal totalPrice,  ShippingType shippingType){
         Product product = productService.getProductById(id);
 
         User account = accountUtils.getCurrentUser();
@@ -86,8 +104,19 @@ public class OrderService {
         orderItem.setOrder(order);
         orderItem.setProduct(product);
         orderItem.setPrice(product.getSellingPrice());
-        order.setTotalPrice(order.getTotalPrice().add(product.getSellingPrice()));
+        order.setShippingType(shippingType);
+        order.setTotalPrice(totalPrice);
         order.getOrderItems().add(orderItem);
+
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setOrder(order);
+        orderHistory.setStatus(OrderStatus.PENDING_PAYMENT);
+
+        order.getOrderHistories().add(orderHistory);
+
+        orderHistoryRepository.save(orderHistory);
+
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
@@ -108,16 +137,48 @@ public class OrderService {
 
 
         if(statusRequest.getStatus().equals(OrderStatus.PAID)){
+
             account.getCart().getCartItems().stream().forEach((cartItem) -> {
                 order.getOrderItems().stream().forEach((orderItem) -> {
                     if(cartItem.getProduct().getId().equals(orderItem.getProduct().getId())){
+                        Product product = orderItem.getProduct();
+                        product.setDeleted(true);
                         cartItem.setStatus(CartItemStatus.PURCHASED);
+                        productRepository.save(product);
                         cartItemRepository.save(cartItem);
                     }
                 });
             });
         }
 
+        if(statusRequest.getStatus().equals(OrderStatus.PAID) || statusRequest.getStatus().equals(OrderStatus.AWAITING_DELIVERY) || statusRequest.getStatus().equals(OrderStatus.AWAITING_PICKUP) || statusRequest.getStatus().equals(OrderStatus.COMPLETED)){
+            order.getOrderItems().stream().forEach((orderItem) -> {
+                Product product = orderItem.getProduct();
+                ProductHistory productHistory = new ProductHistory();
+                productHistory.setCreatedAt(dateNowUtils.dateNow());
+                productHistory.setProduct(product);
+                productHistory.setStatus(statusRequest.getStatus().name());
+
+                product.getProductHistories().add(productHistory);
+                productHistoryRepository.save(productHistory);
+                productRepository.save(product);
+
+            });
+
+        }
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setOrder(order);
+        orderHistory.setStatus(statusRequest.getStatus());
+
+        if(statusRequest.getStatus().equals(OrderStatus.COMPLETED)){
+            orderHistory.setNote(statusRequest.getNoteCompleted());
+            orderHistory.setImage(statusRequest.getImageCompleted());
+        }
+
+        order.getOrderHistories().add(orderHistory);
+
+        orderHistoryRepository.save(orderHistory);
 
         order.setStatus(statusRequest.getStatus());
         return orderMapper.toOrderResponse(orderRepository.save(order));
@@ -127,7 +188,7 @@ public class OrderService {
         return orderMapper.toOrderResponses(orderRepository.findAll());
     }
 
-    public OrderResponse createGuestOrder(List<Long> productIds, Address guestAddress) {
+    public OrderResponse createGuestOrder(List<Long> productIds, Address guestAddress, BigDecimal totalPrice,  ShippingType shippingType) {
         Order order = new Order();
         
         // Create and save guest address
@@ -149,10 +210,21 @@ public class OrderService {
                 orderItem.setOrder(order);
                 orderItem.setProduct(product);
                 orderItem.setPrice(product.getSellingPrice());
-                order.setTotalPrice(order.getTotalPrice().add(product.getSellingPrice()));
+//                order.setTotalPrice(order.getTotalPrice().add(product.getSellingPrice()));
                 order.getOrderItems().add(orderItem);
             });
         }
+        order.setShippingType(shippingType);
+        order.setTotalPrice(totalPrice);
+
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setOrder(order);
+        orderHistory.setStatus(OrderStatus.PENDING_PAYMENT);
+
+        order.getOrderHistories().add(orderHistory);
+
+        orderHistoryRepository.save(orderHistory);
         
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }

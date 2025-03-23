@@ -1,12 +1,19 @@
 package com.BE.model.request;
 
 
+import com.BE.enums.ShippingType;
+import com.BE.enums.StatusEnum;
+import com.BE.exception.EnumValidator;
 import com.BE.model.entity.Address;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +40,15 @@ public class CreatePaymentLinkRequestBody {
     private String guestEmail;
     private String guestPhone;
     private Address guestAddress;
-    
+
+    @Schema(example = "HOME_DELIVERY, IN_STORE_PICKUP", description = "Type Enum")
+    @EnumValidator(enumClass = ShippingType.class, message = "Invalid Enum value")
+    @Enumerated(EnumType.STRING)
+    ShippingType shippingType;
+
+    private BigDecimal totalPrice = BigDecimal.ZERO;
+
+
     // Used for direct product checkout (guest mode)
     private List<Long> productIds;
 }

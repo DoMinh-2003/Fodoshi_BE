@@ -65,6 +65,9 @@ public class Product {
     private String mainImage; // Ảnh chính
 
 
+    private boolean isDeleted = false;
+
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "product_tag",
@@ -89,6 +92,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<Report> reports = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonIgnore
+    private Set<ProductHistory> productHistories = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "consignor_id", nullable = false)

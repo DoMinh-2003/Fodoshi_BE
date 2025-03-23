@@ -55,7 +55,7 @@ public class OrderPayosController {
         guestAddress.setGuestPhone(requestBody.getGuestPhone());
         
         // Create guest order
-        OrderResponse orderResponse = orderService.createGuestOrder(productIds, guestAddress);
+        OrderResponse orderResponse = orderService.createGuestOrder(productIds, guestAddress,  requestBody.getTotalPrice(), requestBody.getShippingType());
         
         // Process payment using common method
         return processPayment(orderResponse, requestBody);
@@ -69,9 +69,9 @@ public class OrderPayosController {
         
         // Authenticated user flow
         if (requestBody.getProductId() == null) {
-            orderResponse = orderService.created(requestBody.getCartItemIds(), requestBody.getAddressId());
+            orderResponse = orderService.created(requestBody.getCartItemIds(), requestBody.getAddressId(), requestBody.getTotalPrice(), requestBody.getShippingType());
         } else {
-            orderResponse = orderService.payment(requestBody.getProductId(), requestBody.getAddressId());
+            orderResponse = orderService.payment(requestBody.getProductId(), requestBody.getAddressId(), requestBody.getTotalPrice(), requestBody.getShippingType());
         }
         
         // Process payment using common method

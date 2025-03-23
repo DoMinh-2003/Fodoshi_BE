@@ -3,6 +3,7 @@ package com.BE.controller;
 import com.BE.enums.ProductStatus;
 import com.BE.model.entity.Product;
 import com.BE.model.entity.User;
+import com.BE.model.request.OrderStatusRequest;
 import com.BE.model.request.ProductRequestDTO;
 import com.BE.model.request.ProductStatusRequest;
 import com.BE.model.response.ProductResponseDTO;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/products")
@@ -51,6 +53,11 @@ class ProductController {
         return ResponseEntity.ok(productService.getProductByStatus(status));
     }
 
+
+    @PatchMapping("{id}/status")
+    public ResponseEntity changeStatus(@PathVariable Long id, @RequestBody ProductStatusRequest status) {
+        return ResponseEntity.ok(productService.changeStatus(id,status));
+    }
 
 
     @DeleteMapping("{id}")

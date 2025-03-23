@@ -1,6 +1,7 @@
 package com.BE.model.entity;
 
 import com.BE.enums.OrderStatus;
+import com.BE.enums.ShippingType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +32,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    ShippingType shippingType;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
@@ -50,5 +54,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<Transaction> transactions = new HashSet<>();
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonIgnore
+    private Set<OrderHistory> orderHistories = new HashSet<>();
 
 }
