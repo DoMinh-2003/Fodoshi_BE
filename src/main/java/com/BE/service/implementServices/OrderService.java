@@ -59,7 +59,7 @@ public class OrderService {
         User account = accountUtils.getCurrentUser();
         Order order = new Order();
 
-        order.setCreatedAt(dateNowUtils.dateNow());
+        order.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setUser(account);
         Address address = addressService.getAddressById(addressId);
@@ -78,7 +78,7 @@ public class OrderService {
         order.setTotalPrice(totalPrice);
 
         OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         orderHistory.setOrder(order);
         orderHistory.setStatus(OrderStatus.PENDING_PAYMENT);
 
@@ -98,7 +98,7 @@ public class OrderService {
         Address address = addressService.getAddressById(addressId);
         order.setAddress(address);
 
-        order.setCreatedAt(dateNowUtils.dateNow());
+        order.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setUser(account);
         orderItem.setOrder(order);
@@ -109,7 +109,7 @@ public class OrderService {
         order.getOrderItems().add(orderItem);
 
         OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         orderHistory.setOrder(order);
         orderHistory.setStatus(OrderStatus.PENDING_PAYMENT);
 
@@ -155,7 +155,7 @@ public class OrderService {
             order.getOrderItems().stream().forEach((orderItem) -> {
                 Product product = orderItem.getProduct();
                 ProductHistory productHistory = new ProductHistory();
-                productHistory.setCreatedAt(dateNowUtils.dateNow());
+                productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
                 productHistory.setProduct(product);
                 productHistory.setStatus(statusRequest.getStatus().name());
 
@@ -167,7 +167,7 @@ public class OrderService {
 
         }
         OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         orderHistory.setOrder(order);
         orderHistory.setStatus(statusRequest.getStatus());
 
@@ -197,7 +197,7 @@ public class OrderService {
         order.setAddress(savedAddress);
         
         // Set order metadata
-        order.setCreatedAt(dateNowUtils.dateNow());
+        order.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setUser(null); // No user for guest order
         order.setTotalPrice(BigDecimal.ZERO); // Initialize total price
@@ -218,7 +218,7 @@ public class OrderService {
         order.setTotalPrice(totalPrice);
 
         OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setCreatedAt(dateNowUtils.dateNow());
+        orderHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         orderHistory.setOrder(order);
         orderHistory.setStatus(OrderStatus.PENDING_PAYMENT);
 

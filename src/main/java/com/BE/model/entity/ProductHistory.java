@@ -3,8 +3,11 @@ package com.BE.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.persistence.Convert;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import java.time.LocalDateTime;
+import com.BE.converter.StringToLocalDateTimeConverter;
 
 @Entity
 @Getter
@@ -20,7 +23,9 @@ public class ProductHistory {
 
     String status;
 
-    String createdAt;
+    @Column(name = "created_at", columnDefinition = "VARCHAR(255)")
+    @Convert(converter = StringToLocalDateTimeConverter.class)
+    LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

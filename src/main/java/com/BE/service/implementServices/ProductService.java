@@ -82,7 +82,7 @@ public class ProductService {
         product.setGender(productDTO.getGender());
 
         ProductHistory productHistory = new ProductHistory();
-        productHistory.setCreatedAt(dateNowUtils.dateNow());
+        productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         productHistory.setProduct(product);
         productHistory.setStatus(productDTO.getProductStatus().name());
 
@@ -149,7 +149,7 @@ public class ProductService {
 
         if(!product.getStatus().equals(productDTO.getProductStatus())){
             ProductHistory productHistory = new ProductHistory();
-            productHistory.setCreatedAt(dateNowUtils.dateNow());
+            productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
             productHistory.setProduct(product);
             productHistory.setStatus(productDTO.getProductStatus().name());
 
@@ -207,7 +207,7 @@ public class ProductService {
         product.setStatus(status.getStatus());
 
         ProductHistory productHistory = new ProductHistory();
-        productHistory.setCreatedAt(dateNowUtils.dateNow());
+        productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
         productHistory.setProduct(product);
         productHistory.setStatus(status.getStatus().name());
 

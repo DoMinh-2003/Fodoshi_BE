@@ -4,8 +4,12 @@ package com.BE.model.entity;
 import com.BE.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.persistence.Convert;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import com.BE.converter.StringToLocalDateTimeConverter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,9 +30,11 @@ public class OrderHistory {
 
     String note;
 
-    String createdAt;
+    @Column(name = "created_at", columnDefinition = "VARCHAR(255)")
+    @Convert(converter = StringToLocalDateTimeConverter.class)
+    LocalDateTime createdAt;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "order_id")
     @JsonIgnore
     Order order;

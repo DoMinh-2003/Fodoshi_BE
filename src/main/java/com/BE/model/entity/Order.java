@@ -4,11 +4,14 @@ import com.BE.enums.OrderStatus;
 import com.BE.enums.ShippingType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.persistence.Convert;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.UuidGenerator;
+import com.BE.converter.StringToLocalDateTimeConverter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +30,10 @@ public class Order {
     UUID id;
 
     BigDecimal totalPrice = BigDecimal.ZERO;
-    String createdAt;
+    
+    @Column(name = "created_at", columnDefinition = "VARCHAR(255)")
+    @Convert(converter = StringToLocalDateTimeConverter.class)
+    LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     OrderStatus status;

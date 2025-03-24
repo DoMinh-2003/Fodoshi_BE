@@ -1,6 +1,7 @@
 package com.BE.model.response;
 
 import com.BE.enums.OrderStatus;
+import com.BE.model.entity.Address;
 import com.BE.model.entity.OrderHistory;
 import com.BE.model.entity.OrderItem;
 import com.BE.model.entity.User;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -26,12 +28,13 @@ public class OrderResponse {
 
     BigDecimal totalPrice;
 
-    String createdAt;
+    LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
     User user;
+    Address address;
 
     Set<OrderItem> orderItems = new HashSet<>();
 
