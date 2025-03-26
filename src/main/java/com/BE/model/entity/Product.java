@@ -98,7 +98,7 @@ public class Product {
     private Set<ProductHistory> productHistories = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "consignor_id", nullable = false)
+    @JoinColumn(name = "consignor_id")
     private User consignor;
 
     @Column(nullable = false, updatable = false)

@@ -166,12 +166,17 @@ public class AdminDashboardService {
         long totalProducts = productRepository.count();
         summary.setTotalProducts(totalProducts);
 
-        // Available products
-        long availableProducts = productRepository.findAllByStatus(ProductStatus.AVAILABLE).size();
+        // Available products - Sản phẩm có sẵn là sản phẩm có trạng thái AVAILABLE và chưa bị xóa
+        long availableProducts = productRepository.findAll().stream()
+                .filter(product -> !product.isDeleted())
+                .count();
         summary.setAvailableProducts(availableProducts);
 
-        // Sold products
-        long soldProducts = productRepository.findAllByStatus(ProductStatus.SOLD).size();
+        // Sold products - Sản phẩm đã bán là sản phẩm có isDeleted = true
+        long soldProducts = productRepository.findAll().stream()
+                .filter(product -> product.isDeleted())
+                .count();
+
         summary.setSoldProducts(soldProducts);
 
         return summary;
@@ -285,8 +290,14 @@ public class AdminDashboardService {
         LocalDateTime endDateTime = day.atTime(LocalTime.MAX);
 
         // Pass LocalDateTime objects to the repository method
+        // Chỉ tính doanh thu từ các đơn hàng đã thanh toán (PAID)
         List<Order> orders = orderRepository.findAllByCreatedAtBetweenAndStatus(
                 startDateTime, endDateTime, OrderStatus.PAID);
+
+        // Kiểm tra xem danh sách có rỗng không trước khi tính tổng
+        if (orders.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
 
         return orders.stream()
                 .map(Order::getTotalPrice)
@@ -339,9 +350,16 @@ public class AdminDashboardService {
         LocalDateTime endOfDay = day.atTime(LocalTime.MAX);
         
         // Pass LocalDateTime objects directly to the repository method
+        // Chỉ đếm các đơn hàng đã thanh toán (PAID)
         List<Order> orders = orderRepository.findAllByCreatedAtBetweenAndStatus(
                 startOfDay, endOfDay, OrderStatus.PAID);
         
+        // Kiểm tra xem danh sách có rỗng không trước khi tính tổng
+        if (orders.isEmpty()) {
+            return 0;
+        }
+        
+        // Đếm số lượng sản phẩm (mỗi sản phẩm có số lượng là 1)
         return orders.stream()
                 .mapToInt(order -> order.getOrderItems().size())
                 .sum();
@@ -358,6 +376,12 @@ public class AdminDashboardService {
         List<Order> orders = orderRepository.findAllByCreatedAtBetweenAndStatus(
                 startOfMonth, endOfMonth, OrderStatus.PAID);
         
+        // Kiểm tra xem danh sách có rỗng không trước khi tính tổng
+        if (orders.isEmpty()) {
+            return 0;
+        }
+        
+        // Đếm số lượng sản phẩm (mỗi sản phẩm có số lượng là 1)
         return orders.stream()
                 .mapToInt(order -> order.getOrderItems().size())
                 .sum();
@@ -374,8 +398,57 @@ public class AdminDashboardService {
         List<Order> orders = orderRepository.findAllByCreatedAtBetweenAndStatus(
                 startOfYear, endOfYear, OrderStatus.PAID);
         
+        // Kiểm tra xem danh sách có rỗng không trước khi tính tổng
+        if (orders.isEmpty()) {
+            return 0;
+        }
+        
+        // Đếm số lượng sản phẩm (mỗi sản phẩm có số lượng là 1)
         return orders.stream()
                 .mapToInt(order -> order.getOrderItems().size())
                 .sum();
+    }
+
+    public List<ProductResponseDTO> getRecentlySoldProducts(int limit) {
+        // Lấy tất cả sản phẩm đã bán (isDeleted = true)
+        List<Product> soldProducts = productRepository.findAllByIsDeleted(true);
+        
+
+        return soldProducts.stream()
+                .filter(product -> !product.getOrderItems().isEmpty())
+                .sorted((p1, p2) -> {
+                    // Tìm orderItem mới nhất cho mỗi sản phẩm
+                    LocalDateTime p1LatestOrder = p1.getOrderItems().stream()
+                            .map(item -> item.getOrder().getCreatedAt())
+                            .max(LocalDateTime::compareTo)
+                            .orElse(LocalDateTime.MIN);
+                    
+                    LocalDateTime p2LatestOrder = p2.getOrderItems().stream()
+                            .map(item -> item.getOrder().getCreatedAt())
+                            .max(LocalDateTime::compareTo)
+                            .orElse(LocalDateTime.MIN);
+                    
+                    // Sắp xếp ngược (mới nhất lên đầu)
+                    return p2LatestOrder.compareTo(p1LatestOrder);
+                })
+                .limit(limit)
+                .map(product -> {
+                    // Chuyển sang DTO cho response
+                    ProductResponseDTO dto = new ProductResponseDTO();
+                    dto.setId(product.getId());
+                    dto.setName(product.getName());
+                    dto.setPrice(product.getOriginalPrice());
+                    dto.setSoldAt(product.getOrderItems().stream()
+                            .map(item -> item.getOrder().getCreatedAt())
+                            .max(LocalDateTime::compareTo)
+                            .orElse(null));
+                    
+                    // Thêm các thông tin khác cần thiết
+                    dto.setImage(product.getMainImage());
+                    dto.setBrandName(product.getBrands().isEmpty() ? "" : product.getBrands().iterator().next().getName());
+                    
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

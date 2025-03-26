@@ -4,6 +4,7 @@ package com.BE.service.implementServices;
 
 import com.BE.enums.CartItemStatus;
 import com.BE.enums.OrderStatus;
+import com.BE.enums.ProductStatus;
 import com.BE.enums.ShippingType;
 import com.BE.exception.exceptions.NotFoundException;
 import com.BE.mapper.OrderMapper;
@@ -137,13 +138,13 @@ public class OrderService {
 
 
         if(statusRequest.getStatus().equals(OrderStatus.PAID)){
-
             account.getCart().getCartItems().stream().forEach((cartItem) -> {
                 order.getOrderItems().stream().forEach((orderItem) -> {
                     if(cartItem.getProduct().getId().equals(orderItem.getProduct().getId())){
                         Product product = orderItem.getProduct();
                         product.setDeleted(true);
                         cartItem.setStatus(CartItemStatus.PURCHASED);
+                        cartItem.getProduct().setStatus(ProductStatus.SOLD);
                         productRepository.save(product);
                         cartItemRepository.save(cartItem);
                     }
@@ -229,19 +230,72 @@ public class OrderService {
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    public OrderResponse changeGuestOrderStatus(UUID id, OrderStatusRequest statusRequest, String guestEmail) {
-        Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Order not found"));
+  public OrderResponse changeGuestOrderStatus(UUID id, OrderStatusRequest statusRequest, String guestEmail) {
+    Order order = orderRepository.findByIdAndStatus(id,OrderStatus.PENDING_PAYMENT).orElseThrow(() -> new NotFoundException("Order Not found"));
+    
+    // Khi đơn hàng được thanh toán
+    if(statusRequest.getStatus().equals(OrderStatus.PAID)){
+        // Đối với guest orders, cập nhật trực tiếp sản phẩm
+        order.getOrderItems().forEach(orderItem -> {
+            Product product = orderItem.getProduct();
+            product.setDeleted(true);
+            product.setStatus(ProductStatus.SOLD);
+            productRepository.save(product);
+        });
         
-        // Verify this is a guest order
-        if (order.getUser() != null) {
-            throw new IllegalArgumentException("This is not a guest order");
+        // Nếu người dùng hiện tại là admin đã đăng nhập (xử lý đơn hàng)
+        // và họ có sản phẩm trong giỏ hàng trùng với đơn hàng này
+        try {
+            User account = accountUtils.getCurrentUser();
+            if(account != null && account.getCart() != null) {
+                account.getCart().getCartItems().forEach(cartItem -> {
+                    order.getOrderItems().forEach(orderItem -> {
+                        if(cartItem.getProduct().getId().equals(orderItem.getProduct().getId())){
+                            cartItem.setStatus(CartItemStatus.PURCHASED);
+                            cartItemRepository.save(cartItem);
+                        }
+                    });
+                });
+            }
+        } catch (Exception e) {
+            // Xử lý trường hợp không có user đăng nhập (admin xử lý qua API)
         }
-        
-
-        
-        // Update the order status
-        order.setStatus(statusRequest.getStatus());
-        return orderMapper.toOrderResponse(orderRepository.save(order));
     }
+
+    // Cập nhật lịch sử sản phẩm
+    if(statusRequest.getStatus().equals(OrderStatus.PAID) 
+            || statusRequest.getStatus().equals(OrderStatus.AWAITING_DELIVERY) 
+            || statusRequest.getStatus().equals(OrderStatus.AWAITING_PICKUP) 
+            || statusRequest.getStatus().equals(OrderStatus.COMPLETED)){
+        
+        order.getOrderItems().forEach(orderItem -> {
+            Product product = orderItem.getProduct();
+            ProductHistory productHistory = new ProductHistory();
+            productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
+            productHistory.setProduct(product);
+            productHistory.setStatus(statusRequest.getStatus().name());
+
+            product.getProductHistories().add(productHistory);
+            productHistoryRepository.save(productHistory);
+            productRepository.save(product);
+        });
+    }
+
+    // Cập nhật lịch sử đơn hàng
+    OrderHistory orderHistory = new OrderHistory();
+    orderHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
+    orderHistory.setOrder(order);
+    orderHistory.setStatus(statusRequest.getStatus());
+
+    if(statusRequest.getStatus().equals(OrderStatus.COMPLETED)){
+        orderHistory.setNote(statusRequest.getNoteCompleted());
+        orderHistory.setImage(statusRequest.getImageCompleted());
+    }
+
+    order.getOrderHistories().add(orderHistory);
+    orderHistoryRepository.save(orderHistory);
+
+    order.setStatus(statusRequest.getStatus());
+    return orderMapper.toOrderResponse(orderRepository.save(order));
+}
 }

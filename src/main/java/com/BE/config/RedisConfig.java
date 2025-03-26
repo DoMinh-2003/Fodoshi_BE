@@ -1,6 +1,5 @@
 package com.BE.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +10,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
-@ConditionalOnProperty(prefix = "spring.data.redis", name = "host")
 public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String redisHost;
@@ -24,7 +22,6 @@ public class RedisConfig {
         // Tạo Standalone Connection tới Redis
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(redisHost, redisPort));
     }
-    
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();

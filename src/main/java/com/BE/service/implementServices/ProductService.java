@@ -45,61 +45,88 @@ public class ProductService {
     }
 
     public Product createProduct(ProductRequestDTO productDTO) {
-        User user = AccountUtils.getCurrentUser();
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        for(Long id: productDTO.getCategory()){
+    User user = AccountUtils.getCurrentUser();
+    Product product = new Product();
+    product.setName(productDTO.getName());
+    product.setDescription(productDTO.getDescription());
+    
+    // Sửa lỗi: Lưu product trước để có ID
+    product.setProductCondition(productDTO.getCondition());
+    product.setSize(productDTO.getSize());
+    product.setColor(productDTO.getColor());
+    product.setStatus(productDTO.getProductStatus());
+    product.setOriginalPrice(productDTO.getOriginalPrice());
+    product.setSellingPrice(productDTO.getSellingPrice());
+    product.setMainImage(productDTO.getMainImage());
+    product.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
+    product.setGender(productDTO.getGender());
+    
+    // Add this line to set the deleted field to false
+    product.setDeleted(false);
+
+    if(productDTO.getProductStatus().equals(ProductStatus.PENDING)){
+        product.setConsignor(user);
+    } else {
+        if (productDTO.getConsignorId() == null) {
+            // If no consignorId is provided, use current user
+            product.setConsignor(user);
+        } else {
+            product.setConsignor(userRepository.findById(productDTO.getConsignorId())
+                .orElseThrow(() -> new NotFoundException("user not found")));
+        }
+    }
+    
+    // Lưu product trước khi tạo relationships
+    Product savedProduct = productRepository.save(product);
+    
+    // Thêm categories
+    if (productDTO.getCategory() != null) {
+        for(Long id: productDTO.getCategory()) {
             Category category = categoryService.getCategoryById(id);
-            category.getProducts().add(product);
-            product.getCategories().add(category);
+            savedProduct.getCategories().add(category);
         }
-        for(Long id: productDTO.getBrand()){
+    }
+    
+    // Thêm brands
+    if (productDTO.getBrand() != null) {
+        for(Long id: productDTO.getBrand()) {
             Brand brand = brandService.getBrandById(id);
-            brand.getProducts().add(product);
-            product.getBrands().add(brand);
+            savedProduct.getBrands().add(brand);
         }
-        product.setProductCondition(productDTO.getCondition());
-        product.setSize(productDTO.getSize());
-        product.setColor(productDTO.getColor());
-        for(String url: productDTO.getImageUrls()){
+    }
+    
+    // Thêm images
+    if (productDTO.getImageUrls() != null) {
+        for(String url: productDTO.getImageUrls()) {
             Image image = new Image();
             image.setImage(url);
-            image.setProduct(product);
-            product.getImageUrls().add(image);
+            image.setProduct(savedProduct);
+            image.setImage(url); // Chắc chắn thiết lập đúng trường URL
+            imageRepository.save(image);
         }
-        for(String name: productDTO.getTags()){
+    }
+    
+    // Thêm tags
+    if (productDTO.getTags() != null) {
+        for(String name: productDTO.getTags()) {
             Tag tag = new Tag();
             tag.setTagName(name);
-            tag.getProducts().add(product);
-            product.getTags().add(tag);
+            tag.getProducts().add(savedProduct);
+            tagRepository.save(tag);
+            savedProduct.getTags().add(tag);
         }
-        product.setStatus(productDTO.getProductStatus());
-        product.setOriginalPrice(productDTO.getOriginalPrice());
-        product.setSellingPrice(productDTO.getSellingPrice());
-        product.setMainImage(productDTO.getMainImage());
-        product.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
-        product.setGender(productDTO.getGender());
-
-        ProductHistory productHistory = new ProductHistory();
-        productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
-        productHistory.setProduct(product);
-        productHistory.setStatus(productDTO.getProductStatus().name());
-
-        product.getProductHistories().add(productHistory);
-        productHistoryRepository.save(productHistory);
-
-        if(productDTO.getProductStatus().equals(ProductStatus.PENDING)){
-            product.setConsignor(user);
-        }else{
-            product.setConsignor(userRepository.findById(productDTO.getConsignorId()).orElseThrow(() -> new NotFoundException("user not found")));
-        }
-
-
-
-        return productRepository.save(product);
     }
-
+    
+    // Tạo product history sau khi đã lưu product
+    ProductHistory productHistory = new ProductHistory();
+    productHistory.setCreatedAt(dateNowUtils.getCurrentDateTimeHCM());
+    productHistory.setProduct(savedProduct);
+    productHistory.setStatus(productDTO.getProductStatus().name());
+    productHistoryRepository.save(productHistory);
+    
+    // Lưu product lần cuối với tất cả mối quan hệ
+    return productRepository.save(savedProduct);
+}
 
     public Product updateProduct(Long id, ProductRequestDTO productDTO) {
         Product product = getProductById(id);

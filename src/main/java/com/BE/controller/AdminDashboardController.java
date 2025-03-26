@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/admin/dashboard")
@@ -83,5 +84,13 @@ public class AdminDashboardController {
     public ResponseEntity getDashboardOverview() {
         DashboardOverviewDTO overview = dashboardService.getDashboardOverview();
         return responseHandler.response(200, "Dashboard overview fetched successfully", overview);
+    }
+
+    @GetMapping("/recently-sold")
+    public ResponseEntity getRecentlySoldProducts(
+            @RequestParam(defaultValue = "10") int limit) {
+        
+        List<ProductResponseDTO> recentlySold = dashboardService.getRecentlySoldProducts(limit);
+        return responseHandler.response(200, "Recently sold products fetched successfully", recentlySold);
     }
 }

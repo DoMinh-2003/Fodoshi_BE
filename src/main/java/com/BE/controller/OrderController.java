@@ -40,6 +40,10 @@ public class OrderController {
     public ResponseEntity getdetail(@PathVariable UUID id) {
         return responseHandler.response(200, "Get OrderDetail Successfully!", orderService.getdetail(id));
     }
+    @GetMapping("/guess/{id}")
+    public ResponseEntity getdetailGuess(@PathVariable UUID id) {
+        return responseHandler.response(200, "Get OrderDetail Successfully!", orderService.getdetail(id));
+    }
 
     @GetMapping
     public ResponseEntity getAll() {

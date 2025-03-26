@@ -49,6 +49,7 @@ public class SecurityConfig  {
             "/api/logout",
             "/api/payment/create/guest",
             "/api/order/status/guest/**",
+            "/api/order/guess/**",
     };
 
     private final String[] PUBLIC_ENDPOINTS_METHOD = {
@@ -58,6 +59,7 @@ public class SecurityConfig  {
             "/api/brands/**",
             "/api/products/status/**",
 //            "/api/order/**",
+            "/api/order/guess/**",
             "/api/payment/create/guest",
             "/api/order/status/guest/**",
     };
