@@ -50,6 +50,14 @@ public class OrderController {
         return responseHandler.response(200, "Get All Order Successfully!", orderService.getAll());
     }
 
+    // Chỉ cần một tham số searchTerm (số điện thoại hoặc email)
+    @GetMapping("/phone-email")
+    public ResponseEntity getOrdersByPhoneOrEmail(@RequestParam String searchTerm) {
+
+        return responseHandler.response(200, "Get Order By Phone Or Email Successfully!", orderService.getOrdersByPhoneOrEmail(searchTerm));
+
+    }
+
     @GetMapping("/account")
     public ResponseEntity getByAccount() {
         return responseHandler.response(200, "Get Order By Account Successfully!", orderService.getByAccount());

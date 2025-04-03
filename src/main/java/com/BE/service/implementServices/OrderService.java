@@ -8,11 +8,13 @@ import com.BE.enums.ProductStatus;
 import com.BE.enums.ShippingType;
 import com.BE.exception.exceptions.NotFoundException;
 import com.BE.mapper.OrderMapper;
+import com.BE.model.EmailDetail;
 import com.BE.model.entity.*;
 import com.BE.model.request.OrderRequest;
 import com.BE.model.request.OrderStatusRequest;
 import com.BE.model.response.OrderResponse;
 import com.BE.repository.*;
+import com.BE.service.EmailService;
 import com.BE.utils.AccountUtils;
 import com.BE.utils.DateNowUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,10 @@ public class OrderService {
 
     @Autowired
     ProductHistoryRepository productHistoryRepository;
+
+
+    @Autowired
+    EmailService emailService;
 
     public OrderResponse created(List<UUID> cartItemIds, Long addressId , BigDecimal totalPrice , ShippingType shippingType) {
 
@@ -150,7 +156,27 @@ public class OrderService {
                     }
                 });
             });
+
+
+            EmailDetail emailDetail = new EmailDetail();
+            emailDetail.setRecipient(account.getEmail());
+            emailDetail.setSubject("Cảm ơn bạn đã chọn Fodoshi – Sống xanh, mua sắm bền vững!");
+            emailDetail.setMsgBody("aaa");
+            emailDetail.setButtonValue("Xem đơn hàng");
+            emailDetail.setFullName(account.getName());
+            emailDetail.setLink("https://fodoshi.shop");
+
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    emailService.sendMailTemplate(emailDetail);
+                }
+
+            };
+            new Thread(r).start();
+
         }
+
 
         if(statusRequest.getStatus().equals(OrderStatus.PAID) || statusRequest.getStatus().equals(OrderStatus.AWAITING_DELIVERY) || statusRequest.getStatus().equals(OrderStatus.AWAITING_PICKUP) || statusRequest.getStatus().equals(OrderStatus.COMPLETED)){
             order.getOrderItems().stream().forEach((orderItem) -> {
@@ -260,6 +286,26 @@ public class OrderService {
         } catch (Exception e) {
             // Xử lý trường hợp không có user đăng nhập (admin xử lý qua API)
         }
+
+
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setRecipient(order.getAddress().getGuestEmail());
+        emailDetail.setSubject("Cảm ơn bạn đã chọn Fodoshi – Sống xanh, mua sắm bền vững!");
+        emailDetail.setMsgBody("aaa");
+        emailDetail.setButtonValue("Xem đơn hàng");
+        emailDetail.setFullName(order.getAddress().getGuestName());
+        emailDetail.setLink("https://fodoshi.shop");
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                emailService.sendMailTemplate(emailDetail);
+            }
+
+        };
+        new Thread(r).start();
+
+
     }
 
     // Cập nhật lịch sử sản phẩm
@@ -298,4 +344,12 @@ public class OrderService {
     order.setStatus(statusRequest.getStatus());
     return orderMapper.toOrderResponse(orderRepository.save(order));
 }
+
+
+
+    public List<Order> getOrdersByPhoneOrEmail(String searchTerm) {
+        return orderRepository.findByUser_PhoneNumberOrUser_EmailOrAddress_GuestPhoneOrAddress_GuestEmail(
+                searchTerm, searchTerm, searchTerm, searchTerm
+        );
+    }
 }
