@@ -131,7 +131,7 @@ public class AuthenticationImpl implements IAuthenticationService {
         emailDetail.setMsgBody("aaa");
         emailDetail.setButtonValue("Reset Password");
         emailDetail.setFullName(user.getName());
-        emailDetail.setLink("http://localhost:5173?token=" + jwtService.generateToken(user));
+        emailDetail.setLink("https://fodoshi.shop?token=" + jwtService.generateToken(user));
 
         Runnable r = new Runnable() {
             @Override

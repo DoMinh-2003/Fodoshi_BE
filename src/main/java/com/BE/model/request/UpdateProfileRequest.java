@@ -1,18 +1,22 @@
 package com.BE.model.request;
 
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UpdateProfileRequest {
+
+    @NotBlank(message = "Image cannot be blank")
+    String image;
 
     @NotBlank(message = "FullName cannot be blank")
     String name;
@@ -23,8 +27,4 @@ public class AuthenticationRequest {
 
     @NotBlank(message = "Phone Number cannot be blank")
     String phoneNumber;
-
-    @NotBlank(message = "Password cannot be blank")
-    @Size(min = 5, message = "Password must be at least 5 characters long.")
-    String password;
 }

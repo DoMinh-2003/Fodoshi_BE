@@ -27,9 +27,10 @@ public class User implements UserDetails {
     @UuidGenerator
     private UUID id;
 
+    private String image;
+
     @Column(nullable = false, length = 255)
     private String name;
-
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
