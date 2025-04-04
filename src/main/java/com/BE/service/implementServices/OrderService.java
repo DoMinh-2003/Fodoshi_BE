@@ -164,7 +164,7 @@ public class OrderService {
             emailDetail.setMsgBody("aaa");
             emailDetail.setButtonValue("Xem đơn hàng");
             emailDetail.setFullName(account.getName());
-            emailDetail.setLink("https://fodoshi.shop");
+            emailDetail.setLink("https://fodoshi.shop/track-order");
 
             Runnable r = new Runnable() {
                 @Override

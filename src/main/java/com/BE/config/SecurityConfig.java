@@ -62,6 +62,8 @@ public class SecurityConfig  {
             "/api/order/guess/**",
             "/api/payment/create/guest",
             "/api/order/status/guest/**",
+            "/api/order/phone-email"
+
     };
 
     @Autowired
