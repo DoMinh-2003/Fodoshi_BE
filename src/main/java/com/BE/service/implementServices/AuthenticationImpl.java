@@ -30,9 +30,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-
 @Service
 public class AuthenticationImpl implements IAuthenticationService {
+
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -97,25 +97,34 @@ public class AuthenticationImpl implements IAuthenticationService {
     }
 
 
-    public AuthenticationResponse loginGoogle (LoginGoogleRequest loginGoogleRequest) {
-        try{
+    public AuthenticationResponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
+        try {
             FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
             String email = decodeToken.getEmail();
-            User user = userRepository.findByEmail(email).orElseThrow();
-            if(user == null) {
+            // Check if user exists first
+            User user = userRepository.findByEmail(email).orElse(null);
+            
+            // Create new user if not found
+            if (user == null) {
                 user = new User();
                 user.setName(decodeToken.getName());
                 user.setEmail(email);
                 user.setRole(UserRole.CONSIGNOR);
+                
+                // Create cart for new user if needed
+                Cart cart = new Cart();
+                cart.setUser(user);
+                user.setCart(cart);
+                
                 user = userRepository.save(user);
             }
+            
             AuthenticationResponse authenticationResponse = userMapper.toAuthenticationResponse(user);
             String refresh = UUID.randomUUID().toString();
-            authenticationResponse.setToken(jwtService.generateToken(user,refresh ,false));
+            authenticationResponse.setToken(jwtService.generateToken(user, refresh, false));
             authenticationResponse.setRefreshToken(refresh);
             return authenticationResponse;
-        } catch (FirebaseAuthException e)
-        {
+        } catch (FirebaseAuthException e) {
             e.printStackTrace();
         }
         return null;

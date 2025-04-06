@@ -15,13 +15,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProfileRequest {
 
-    @NotBlank(message = "Image cannot be blank")
     String image;
 
     @NotBlank(message = "FullName cannot be blank")
     String name;
 
-    @Email(message = "Email is not valid", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     @NotBlank(message = "Email cannot be blank")
     String email;
 

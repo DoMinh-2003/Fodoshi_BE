@@ -4,11 +4,13 @@ package com.BE.controller;
 import com.BE.model.entity.User;
 import com.BE.model.request.*;
 import com.BE.model.response.AuthenticationResponse;
+import com.BE.service.implementServices.AuthenticationImpl;
 import com.BE.service.interfaceServices.IAuthenticationService;
 import com.BE.utils.ResponseHandler;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +49,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login-google")
-    private ResponseEntity checkLoginGoogle(@RequestBody LoginGoogleRequest loginGGRequest){
+    public ResponseEntity checkLoginGoogle(@RequestBody LoginGoogleRequest loginGGRequest){
         return responseHandler.response(200, "Login Google success!", iAuthenticationService.loginGoogle(loginGGRequest));
     }
 

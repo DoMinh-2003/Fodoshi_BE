@@ -33,6 +33,7 @@ public class AuthenticationResponse {
      private LocalDateTime createdAt = LocalDateTime.now();
      String token;
      String refreshToken;
+     String image;
 
 }
 

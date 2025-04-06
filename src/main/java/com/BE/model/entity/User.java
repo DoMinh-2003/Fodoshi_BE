@@ -29,16 +29,12 @@ public class User implements UserDetails {
 
     private String image;
 
-    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(nullable = false, unique = true, length = 20)
     private String phoneNumber;
 
-    @Column(nullable = false)
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
