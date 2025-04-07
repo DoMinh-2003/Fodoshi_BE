@@ -14,4 +14,6 @@ public interface IAuthenticationService {
     String admin();
     AuthenResponse refresh(RefreshRequest refreshRequest);
     void logout(RefreshRequest refreshRequest);
+    AuthenticationResponse getCurrentAccount();
+
 }

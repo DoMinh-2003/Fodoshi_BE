@@ -183,5 +183,11 @@ public class AuthenticationImpl implements IAuthenticationService {
         String refresh = refreshRequest.getRefreshToken();
         refreshTokenService.deleteRefreshToken(refresh);
     }
+
+    @Override
+    public AuthenticationResponse getCurrentAccount() {
+       User user =  accountUtils.getCurrentUser();
+       return userMapper.toAuthenticationResponse(user);
+    }
 }
 

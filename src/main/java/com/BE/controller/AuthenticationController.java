@@ -1,11 +1,14 @@
 package com.BE.controller;
 
 
+import com.BE.mapper.UserMapper;
 import com.BE.model.entity.User;
 import com.BE.model.request.*;
+import com.BE.model.response.AuthenResponse;
 import com.BE.model.response.AuthenticationResponse;
 import com.BE.service.implementServices.AuthenticationImpl;
 import com.BE.service.interfaceServices.IAuthenticationService;
+import com.BE.utils.AccountUtils;
 import com.BE.utils.ResponseHandler;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -26,8 +29,10 @@ public class AuthenticationController {
     @Autowired
     ResponseHandler responseHandler;
 
-
-
+    @Autowired
+    AccountUtils accountUtils;
+    @Autowired
+    UserMapper userMapper;
     @PostMapping("/refresh")
     public ResponseEntity refresh( @RequestBody RefreshRequest refreshRequest){
         return responseHandler.response(200, "Refresh Token success!", iAuthenticationService.refresh(refreshRequest));
@@ -63,6 +68,11 @@ public class AuthenticationController {
     public ResponseEntity resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         iAuthenticationService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok( "Reset Password successfully");
+    }
+
+    @GetMapping("/currentAccount")
+    public ResponseEntity<AuthenticationResponse> currentAccount(){
+        return responseHandler.response(200, "Login Google success!", iAuthenticationService.getCurrentAccount());
     }
 
     @GetMapping("/testRole")

@@ -11,12 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -47,7 +44,8 @@ public class AdminDashboardService {
     public RevenueSummaryDTO getRevenueSummary() {
         RevenueSummaryDTO summary = new RevenueSummaryDTO();
 
-        LocalDate today = LocalDate.now();
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDate today = LocalDate.now(zoneId);
 
         // Today's revenue
         BigDecimal todayRevenue = getRevenueForDay(today);
@@ -73,7 +71,9 @@ public class AdminDashboardService {
         revenueData.setPeriodType(period);
 
         Map<String, BigDecimal> revenueMap = new LinkedHashMap<>();
-        LocalDate today = LocalDate.now();
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDate today = LocalDate.now(zoneId);
+
 
         switch (period.toLowerCase()) {
             case "day":
@@ -242,8 +242,9 @@ public class AdminDashboardService {
     public DashboardOverviewDTO getDashboardOverview() {
         DashboardOverviewDTO overview = new DashboardOverviewDTO();
 
-        // Get today's date
-        LocalDate today = LocalDate.now();
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDate today = LocalDate.now(zoneId);
+
 
         // Set revenue summaries
         overview.setRevenueSummary(getRevenueSummary());
