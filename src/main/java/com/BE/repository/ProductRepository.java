@@ -24,8 +24,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByIsDeleted(Boolean isDelete);
 
 
-    List<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCategories_NameContainingIgnoreCaseOrTags_TagNameContainingIgnoreCase(
-            String nameKeyword, String descKeyword, String categoryKeyword, String tagKeyword);
+    // Tìm theo name, description, category
+    List<Product> findByNameContainingIgnoreCaseOrCategories_NameContainingIgnoreCase(
+            String nameKeyword, String categoryKeyword);
+
+    // Tìm theo tag
+    List<Product> findByTags_TagNameContainingIgnoreCase(String tagKeyword);
+
 
 
 

@@ -249,8 +249,19 @@ public class ProductService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return productRepository.findAll();
         }
-        return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCategories_NameContainingIgnoreCaseOrTags_TagNameContainingIgnoreCase(
-                keyword, keyword, keyword, keyword);
+
+        keyword = keyword.trim();
+
+        // Nếu là tìm theo tag (có dấu #)
+        if (keyword.startsWith("#")) {
+            String tagKeyword = keyword.substring(1); // bỏ dấu #
+            return productRepository.findByTags_TagNameContainingIgnoreCase(tagKeyword);
+        }
+
+        // Nếu không có dấu # -> tìm theo name, description, category
+        return productRepository.findByNameContainingIgnoreCaseOrCategories_NameContainingIgnoreCase(
+                keyword, keyword);
     }
+
 
 }
