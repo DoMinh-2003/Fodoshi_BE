@@ -32,7 +32,7 @@ public class EmailService {
             context.setVariable("name", emailDetail.getFullName());
             context.setVariable("button", emailDetail.getButtonValue());
             context.setVariable("link", emailDetail.getLink());
-
+            context.setVariable("orderId",emailDetail.getOrderId());
             String text = templateEngine.process("emailtemplate", context);
 
             // Creating a simple mail message
