@@ -242,4 +242,15 @@ public class ProductService {
         productHistoryRepository.save(productHistory);
         return productRepository.save(product);
     }
+
+
+
+    public List<Product> searchProducts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return productRepository.findAll();
+        }
+        return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCategories_NameContainingIgnoreCaseOrTags_TagNameContainingIgnoreCase(
+                keyword, keyword, keyword, keyword);
+    }
+
 }

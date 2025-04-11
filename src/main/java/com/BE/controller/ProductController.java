@@ -79,4 +79,12 @@ class ProductController {
     public ResponseEntity updateProduct(@PathVariable Long id,@RequestBody ProductRequestDTO productDTO) {
         return ResponseEntity.ok(productService.updateProduct(id, productDTO));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProducts(
+            @RequestParam(required = false) String keyword
+    ) {
+        List<Product> results = productService.searchProducts(keyword);
+        return ResponseEntity.ok(results);
+    }
 }

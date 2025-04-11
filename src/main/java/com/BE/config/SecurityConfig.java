@@ -63,7 +63,8 @@ public class SecurityConfig  {
             "/api/order/guess/**",
             "/api/payment/create/guest",
             "/api/order/status/guest/**",
-            "/api/order/phone-email"
+            "/api/order/phone-email",
+            "/api/products/search"
 
     };
 
