@@ -438,7 +438,7 @@ public class AdminDashboardService {
                     ProductResponseDTO dto = new ProductResponseDTO();
                     dto.setId(product.getId());
                     dto.setName(product.getName());
-                    dto.setPrice(product.getOriginalPrice());
+                    dto.setPrice(product.getSellingPrice());
                     dto.setSoldAt(product.getOrderItems().stream()
                             .map(item -> item.getOrder().getCreatedAt())
                             .max(LocalDateTime::compareTo)
