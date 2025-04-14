@@ -144,17 +144,18 @@ public class OrderService {
 
 
         if(statusRequest.getStatus().equals(OrderStatus.PAID)){
-            account.getCart().getCartItems().stream().forEach((cartItem) -> {
-                order.getOrderItems().stream().forEach((orderItem) -> {
+            order.getOrderItems().stream().forEach((orderItem) -> {
+                Product product = orderItem.getProduct();
+                product.setDeleted(true);
+                product.setStatus(ProductStatus.SOLD);
+                productRepository.save(product);
+                account.getCart().getCartItems().stream().forEach((cartItem) -> {
                     if(cartItem.getProduct().getId().equals(orderItem.getProduct().getId())){
-                        Product product = orderItem.getProduct();
-                        product.setDeleted(true);
                         cartItem.setStatus(CartItemStatus.PURCHASED);
-                        cartItem.getProduct().setStatus(ProductStatus.SOLD);
-                        productRepository.save(product);
                         cartItemRepository.save(cartItem);
                     }
                 });
+
             });
 
 
