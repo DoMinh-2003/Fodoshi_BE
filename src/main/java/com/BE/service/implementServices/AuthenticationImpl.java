@@ -110,15 +110,17 @@ public class AuthenticationImpl implements IAuthenticationService {
                 user.setName(decodeToken.getName());
                 user.setEmail(email);
                 user.setRole(UserRole.CONSIGNOR);
-                
-                // Create cart for new user if needed
+                user.setPhoneNumber(email);
+                // Create csetsetart for new user if needed
                 Cart cart = new Cart();
                 cart.setUser(user);
                 user.setCart(cart);
                 
                 user = userRepository.save(user);
             }
-            
+
+
+
             AuthenticationResponse authenticationResponse = userMapper.toAuthenticationResponse(user);
             String refresh = UUID.randomUUID().toString();
             authenticationResponse.setToken(jwtService.generateToken(user, refresh, false));

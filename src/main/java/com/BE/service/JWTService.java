@@ -38,6 +38,10 @@ public class JWTService {
 
     public String generateToken(User user, String refresh, boolean isRefresh) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        System.out.println(user.getUsername());
+        String authType = (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty())
+                ? "local"
+                : "google";
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
@@ -45,6 +49,7 @@ public class JWTService {
                 .expirationTime(Date.from(Instant.now().plus(DURATION, ChronoUnit.SECONDS)))
                 .claim("scope", "ROLE_" + user.getRole())
                 .claim("refresh", refresh)
+                .claim("auth_type", authType)
                 .build();
 
         if(!isRefresh){
@@ -115,6 +120,22 @@ public class JWTService {
             JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
 
             return claimsSet.getStringClaim("refresh");
+        } catch (ParseException | JOSEException e) {
+            throw new RuntimeException("Error parsing token", e);
+        }
+    }
+
+    public String getTypeClaim(String token) {
+        try {
+            JWSObject jwsObject = JWSObject.parse(token);
+
+            MACVerifier verifier = new MACVerifier(SECRET_KEY.getBytes());
+            if (!jwsObject.verify(verifier)) {
+                throw new RuntimeException("Invalid token signature");
+            }
+            JWTClaimsSet claimsSet = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
+
+            return claimsSet.getStringClaim("auth_type");
         } catch (ParseException | JOSEException e) {
             throw new RuntimeException("Error parsing token", e);
         }
